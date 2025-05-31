@@ -140,7 +140,7 @@
                         <a class="nav-link" href="/contato">Contato</a>
                     </li>
                 </ul>
-                <div class="d-flex align-items-center">
+                <div class="d-flex align-items-center" id="userNav">
                     <a href="/carrinho" class="btn btn-outline-primary me-2">
                         <i class="fas fa-shopping-cart"></i>
                         <span class="badge bg-primary rounded-pill">0</span>
@@ -196,27 +196,124 @@
     </footer>
 
     <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/imask/6.4.3/imask.min.js"></script>
+    
+    <%- script %> 
+
     <script>
-        console.log('Inicializando scripts...');
-    </script>
-    
-    <!-- jQuery (deve vir primeiro) -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
-    <!-- Bootstrap 5 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- IMask -->
-    <script src="https://unpkg.com/imask"></script>
-    
-    <!-- Scripts da página -->
-    <%- script %>
-    
-    <script>
-        console.log('Scripts carregados:', {
-            jQuery: typeof $ !== 'undefined',
-            IMask: typeof IMask !== 'undefined',
-            Bootstrap: typeof bootstrap !== 'undefined'
+        // Script de autenticação para o layout principal (main.ejs)
+        console.log('[Layout Script] Script de autenticação em main.ejs está sendo inicializado.');
+
+        async function handleMainLogout() {
+            console.log('[Layout Script] handleMainLogout() chamado.');
+            try {
+                const logoutResponse = await fetch('/auth/logout', { method: 'GET' });
+                if (logoutResponse.ok) {
+                    window.location.href = '/'; 
+                } else {
+                    console.error('[Layout Script] Falha no logout:', await logoutResponse.text());
+                    alert('Erro ao fazer logout.');
+                }
+            } catch (err) {
+                console.error('[Layout Script] Erro ao fazer logout:', err);
+                alert('Erro ao fazer logout.');
+            }
+        }
+
+        async function updateMainAuthUI() {
+            console.log('[Layout Script] updateMainAuthUI() foi chamada.');
+            const userNav = document.getElementById('userNav'); // #userNav está em main.ejs
+            
+            if (!userNav) {
+                console.error('[Layout Script] CRÍTICO: Elemento #userNav não encontrado no DOM (main.ejs).');
+                return;
+            }
+            console.log('[Layout Script] Elemento #userNav encontrado.');
+
+            try {
+                console.log('[Layout Script] Tentando fetch para /auth/status...');
+                const response = await fetch('/auth/status');
+                
+                if (!response.ok) {
+                    console.error('[Layout Script] Falha ao buscar status de autenticação:', response.status, response.statusText);
+                    // Mantém a UI de deslogado se o status falhar. 
+                    // A estrutura original de userNav já inclui o botão do carrinho, então vamos replicá-la.
+                    userNav.innerHTML = `
+                        <a href="/carrinho" class="btn btn-outline-primary me-2">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="badge bg-primary rounded-pill">0</span>
+                        </a>
+                        <a href="/auth/login" class="btn btn-outline-primary me-2">Login</a>
+                        <a href="/auth/register" class="btn btn-primary">Cadastrar</a>
+                    `;
+                    return;
+                }
+
+                const data = await response.json();
+                console.log('[Layout Script] Status de autenticação recebido:', data);
+
+                if (data.isAuthenticated && data.user) {
+                    console.log('[Layout Script] Usuário autenticado. Atualizando UI para:', data.user.name);
+                    userNav.innerHTML = `
+                        <div class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" id="navbarDropdownLayoutClient" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user me-1"></i> ${data.user.name.split(' ')[0]}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownLayoutClient">
+                                <li><a class="dropdown-item" href="/auth/profile"><i class="fas fa-id-card me-2"></i>Meu Perfil</a></li>
+                                <li><a class="dropdown-item" href="/orders"><i class="fas fa-box me-2"></i>Meus Pedidos</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item layout-logout-button" href="#"><i class="fas fa-sign-out-alt me-2"></i>Sair</a></li>
+                            </ul>
+                        </div>
+                        <a href="/carrinho" class="btn btn-outline-primary ms-2">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="badge bg-primary rounded-pill">0</span> <!-- Placeholder para contagem do carrinho -->
+                        </a>
+                    `;
+                    // Adiciona listener ao novo botão de logout
+                    const logoutButtonClient = userNav.querySelector('.layout-logout-button');
+                    if (logoutButtonClient) {
+                        logoutButtonClient.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            console.log('[Layout Script] Botão de logout (cliente) clicado.');
+                            handleMainLogout();
+                        });
+                    }
+                } else {
+                    console.log('[Layout Script] Usuário não autenticado ou sem dados de usuário.');
+                    userNav.innerHTML = `
+                        <a href="/carrinho" class="btn btn-outline-primary me-2">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="badge bg-primary rounded-pill">0</span>
+                        </a>
+                        <a href="/auth/login" class="btn btn-outline-primary me-2">Login</a>
+                        <a href="/auth/register" class="btn btn-primary">Cadastrar</a>
+                    `;
+                }
+            } catch (error) {
+                console.error('[Layout Script] Erro dentro de updateMainAuthUI:', error);
+                if (userNav) {
+                     userNav.innerHTML = `
+                        <a href="/carrinho" class="btn btn-outline-primary me-2">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="badge bg-primary rounded-pill">0</span>
+                        </a>
+                        <a href="/auth/login" class="btn btn-outline-primary me-2">Login</a>
+                        <a href="/auth/register" class="btn btn-primary">Cadastrar</a>
+                    `;
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('[Layout Script] DOMContentLoaded disparado em main.ejs. Chamando updateMainAuthUI.');
+            updateMainAuthUI();
+            
+            // O botão de logout do servidor não existe mais neste contexto, pois a UI é toda montada pelo cliente.
         });
     </script>
 </body>

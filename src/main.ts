@@ -6,9 +6,13 @@ import { ValidationPipe } from '@nestjs/common';
 import * as expressLayouts from 'express-ejs-layouts';
 import * as session from 'express-session';
 import * as flash from 'connect-flash';
+import * as cookieParser from 'cookie-parser';
+import { AuthExceptionFilter } from './auth/filters/auth-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  app.use(cookieParser());
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -20,6 +24,8 @@ async function bootstrap() {
       },
     }),
   );
+
+  app.useGlobalFilters(new AuthExceptionFilter());
 
   app.useStaticAssets(join(__dirname, '..', 'public'));
   app.setBaseViewsDir(join(__dirname, '..', 'views'));

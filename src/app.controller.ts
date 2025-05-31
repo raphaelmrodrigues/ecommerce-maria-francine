@@ -12,7 +12,13 @@ export class AppController {
   @Get()
   @Render('home')
   async getHome() {
-    const produtos = await this.productsService.findFeatured();
+    const produtosFromService = await this.productsService.findFeatured();
+    // Garante que price e sale_price sejam números
+    const produtos = produtosFromService.map(p => ({
+      ...p,
+      price: parseFloat(p.price as any), 
+      sale_price: p.sale_price ? parseFloat(p.sale_price as any) : null,
+    }));
     return {
       produtos,
       title: 'Maria Francine - Vestidos Infantis',

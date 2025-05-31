@@ -46,18 +46,32 @@ export class ProductsController {
   @Get(':slug')
   @Render('products/show')
   async show(@Param('slug') slug: string) {
-    const product = await this.productsService.findBySlug(slug);
+    const productFromService = await this.productsService.findBySlug(slug);
     
-    if (!product) {
+    if (!productFromService) {
       throw new NotFoundException('Produto não encontrado');
     }
 
+    // Garante que price e sale_price sejam números
+    const product = {
+      ...productFromService,
+      price: parseFloat(productFromService.price as any),
+      sale_price: productFromService.sale_price ? parseFloat(productFromService.sale_price as any) : null,
+    };
+
     // Buscar produtos relacionados da mesma categoria
-    const relatedProducts = await this.productsService.findRelatedProducts(
+    const relatedProductsFromService = await this.productsService.findRelatedProducts(
       product.id,
       product.category_id,
       4
     );
+
+    // Garante que price e sale_price sejam números para produtos relacionados
+    const relatedProducts = relatedProductsFromService.map(rp => ({
+      ...rp,
+      price: parseFloat(rp.price as any),
+      sale_price: rp.sale_price ? parseFloat(rp.sale_price as any) : null,
+    }));
 
     return {
       title: product.name,

@@ -1,0 +1,70 @@
+<div class="container py-4">
+    <h1 class="mb-4"><%= title %></h1>
+
+    <% if (locals.error && locals.error.length > 0) { %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <% locals.error.forEach(function(msg){ %><span><%= msg %></span><br><% }); %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <% } %>
+    <% if (locals.success && locals.success.length > 0) { %>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <% locals.success.forEach(function(msg){ %><span><%= msg %></span><br><% }); %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <% } %>
+
+    <form action="/admin/categories/create" method="POST">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Nome da Categoria</label>
+                    <input type="text" class="form-control" id="name" name="name" value="<%= locals.categoryData && categoryData.name ? categoryData.name : '' %>" required>
+                </div>
+                <div class="mb-3">
+                    <label for="slug" class="form-label">Slug (URL Amigável)</label>
+                    <input type="text" class="form-control" id="slug" name="slug" value="<%= locals.categoryData && categoryData.slug ? categoryData.slug : '' %>" required>
+                    <div class="form-text">Ex: nome-da-categoria. Usar letras minúsculas, números e hífens.</div>
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Descrição <small class="text-muted">(Opcional)</small></label>
+                    <textarea class="form-control" id="description" name="description" rows="3"><%= locals.categoryData && categoryData.description ? categoryData.description : '' %></textarea>
+                </div>
+                <div class="d-flex justify-content-end">
+                    <a href="/admin/categories" class="btn btn-outline-secondary me-2">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">Salvar Categoria</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Script para gerar slug automaticamente a partir do nome
+    const nameInputCat = document.getElementById('name');
+    const slugInputCat = document.getElementById('slug');
+
+    if (nameInputCat && slugInputCat) {
+        nameInputCat.addEventListener('keyup', function() {
+            const nameValue = this.value;
+            slugInputCat.value = nameValue.toString().toLowerCase()
+                .replace(/\s+/g, '-')       
+                .replace(/[\u0300-\u036f]/g, "") 
+                .replace(/[^\w\-]+/g, '')   
+                .replace(/\-\-+/g, '-')     
+                .replace(/^-+/, '')          
+                .replace(/-+$/, '');         
+        });
+    }
+</script>
+
+<style>
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+     .btn-primary:hover {
+        background-color: var(--secondary-color);
+        border-color: var(--secondary-color);
+    }
+</style> 

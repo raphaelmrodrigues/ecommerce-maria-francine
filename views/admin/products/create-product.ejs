@@ -1,0 +1,280 @@
+<div class="container py-4">
+    <h1 class="mb-4"><%= title %></h1>
+
+    <% if (locals.error) { %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <% locals.error.forEach(error => { %>
+                <%= error %><br>
+            <% }); %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <% } %>
+    <%# if (locals.success) { %>
+        <!-- <div class="alert alert-success"></div> -->
+    <%# } %>
+
+
+    <form action="/admin/products/create" method="POST" enctype="multipart/form-data">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        Informações Básicas
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Nome do Produto</label>
+                            <input type="text" class="form-control" id="name" name="name" value="<%= productData.name || '' %>" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="slug" class="form-label">Slug (URL Amigável)</label>
+                            <input type="text" class="form-control" id="slug" name="slug" value="<%= productData.slug || '' %>" required>
+                            <div class="form-text">Ex: nome-do-produto-incrivel. Usar letras minúsculas, números e hífens.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Descrição</label>
+                            <textarea class="form-control" id="description" name="description" rows="5" required><%= productData.description || '' %></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        Preços
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="price" class="form-label">Preço (R$)</label>
+                                <input type="number" step="0.01" class="form-control" id="price" name="price" value="<%= productData.price || '' %>" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="sale_price" class="form-label">Preço Promocional (R$) <small class="text-muted">(Opcional)</small></label>
+                                <input type="number" step="0.01" class="form-control" id="sale_price" name="sale_price" value="<%= productData.sale_price || '' %>">
+                            </div>
+                        </div>
+                         <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="on_sale" name="on_sale" value="true" <%= productData.on_sale ? 'checked' : '' %>>
+                            <label class="form-check-label" for="on_sale">Em Promoção?</label>
+                        </div>
+                    </div>
+                </div>
+
+                 <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        Atributos
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Tamanhos</label>
+                            <div>
+                                <% const definedSizes = ["2 anos", "4 anos", "6 anos", "8 anos", "10 anos", "12 anos", "PP", "P", "M", "G", "GG", "Adulto"]; %>
+                                <% definedSizes.forEach(size => { %>
+                                    <% const safeIdPart = size.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, ''); // Remove espaços e caracteres especiais %>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" name="sizes" id="size_<%= safeIdPart %>" value="<%= size %>"
+                                            <%= (productData.sizes && productData.sizes.includes(size)) ? 'checked' : '' %>>
+                                        <label class="form-check-label" for="size_<%= safeIdPart %>"><%= size %></label>
+                                    </div>
+                                <% }); %>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="colors" class="form-label">Cores <small class="text-muted">(Separadas por vírgula, ex: Vermelho,Azul)</small></label>
+                            <input type="text" class="form-control" id="colors" name="colors" value="<%= productData.colors ? productData.colors.join(',') : '' %>">
+                        </div>
+                         <div class="mb-3">
+                            <label for="tags" class="form-label">Tags <small class="text-muted">(Separadas por vírgula)</small></label>
+                            <input type="text" class="form-control" id="tags" name="tags" value="<%= productData.tags ? productData.tags.join(',') : '' %>">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        Organização
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="category_id" class="form-label">Categoria</label>
+                            <select class="form-select" id="category_id" name="category_id" required>
+                                <option value="">Selecione uma categoria</option>
+                                <% categories.forEach(category => { %>
+                                    <option value="<%= category.id %>" <%= productData.category_id == category.id ? 'selected' : '' %>>
+                                        <%= category.name %>
+                                    </option>
+                                <% }); %>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="stock_quantity" class="form-label">Quantidade em Estoque</label>
+                            <input type="number" class="form-control" id="stock_quantity" name="stock_quantity" value="<%= productData.stock_quantity || 0 %>" required>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input type="checkbox" class="form-check-input" id="featured" name="featured" value="true" <%= productData.featured ? 'checked' : '' %>>
+                            <label class="form-check-label" for="featured">Produto em Destaque?</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        Imagens do Produto
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="productImages" class="form-label">Upload de Imagens (até 6 arquivos)</label>
+                            <input class="form-control" type="file" id="productImages" name="productImages" accept="image/jpeg,image/png,image/gif,image/webp" multiple>
+                            <div class="form-text">Selecione uma ou mais imagens para o produto. Limite de 5MB por arquivo.</div>
+                        </div>
+                        <% /* Preview de múltiplas imagens pode ser adicionado aqui com JavaScript se necessário */ %>
+                        <div id="imagePreviewContainer" class="mt-3 d-flex flex-wrap gap-2"></div>
+                    </div>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-lg">Salvar Produto</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Script para gerar slug automaticamente a partir do nome
+    const nameInput = document.getElementById('name');
+    const slugInput = document.getElementById('slug');
+
+    if (nameInput && slugInput) {
+        nameInput.addEventListener('keyup', function() {
+            const nameValue = this.value;
+            slugInput.value = nameValue.toString().toLowerCase()
+                .replace(/\s+/g, '-')        // Substitui espaços por hífens
+                .replace(/[\u0300-\u036f]/g, "") // Remove acentos
+                .replace(/[^\w\-]+/g, '')   // Remove caracteres não alfanuméricos (exceto hífen)
+                .replace(/\-\-+/g, '-')     // Substitui múltiplos hífens por um único
+                .replace(/^-+/, '')          // Remove hífens do início
+                .replace(/-+$/, '');         // Remove hífens do fim
+        });
+    }
+
+    // Lógica para transformar inputs de string separada por vírgula em array no DTO
+    // Isso seria feito no backend ao processar o DTO, mas para o frontend enviar
+    // corretamente os campos como strings, não precisa de script aqui.
+    // O backend (DTO com @Transform ou no service) converteria "P,M,G" para ["P", "M", "G"].
+    // No nosso CreateProductDto, esperamos arrays, então o backend precisa tratar isso.
+    // O controller está esperando CreateProductDto, e o HTML envia strings para sizes/colors/tags.
+    // Precisamos de um @Transform no DTO ou tratar no service.
+
+    // Script para preview de múltiplas imagens
+    const productImagesInput = document.getElementById('productImages');
+    const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+    let selectedFiles = new DataTransfer(); // Usado para gerenciar a lista de arquivos
+
+    if (productImagesInput && imagePreviewContainer) {
+        productImagesInput.addEventListener('change', function(event) {
+            // Adiciona novos arquivos à nossa lista gerenciada
+            const newFiles = event.target.files;
+            for (let i = 0; i < newFiles.length; i++) {
+                // Evitar duplicatas se o usuário selecionar os mesmos arquivos novamente
+                // (Esta verificação de duplicata é básica e baseada no nome e tamanho)
+                let isDuplicate = false;
+                for (let j = 0; j < selectedFiles.files.length; j++) {
+                    if (selectedFiles.files[j].name === newFiles[i].name && selectedFiles.files[j].size === newFiles[i].size) {
+                        isDuplicate = true;
+                        break;
+                    }
+                }
+                if (!isDuplicate) {
+                    selectedFiles.items.add(newFiles[i]);
+                }
+            }
+            // Atualiza o input de arquivo com a lista gerenciada
+            productImagesInput.files = selectedFiles.files;
+            renderPreviews();
+        });
+
+        function renderPreviews() {
+            imagePreviewContainer.innerHTML = ''; // Limpa previews antigos
+
+            if (selectedFiles.files.length === 0) {
+                const noFilesText = document.createElement('p');
+                noFilesText.className = 'text-muted form-text';
+                noFilesText.textContent = 'Nenhuma imagem selecionada.';
+                imagePreviewContainer.appendChild(noFilesText);
+                return;
+            }
+            
+            for (let i = 0; i < selectedFiles.files.length; i++) {
+                const file = selectedFiles.files[i];
+                if (file.type.startsWith('image/')) {
+                    const previewWrapper = document.createElement('div');
+                    previewWrapper.className = 'position-relative border rounded p-1';
+                    previewWrapper.style.width = '120px'; // Tamanho do contêiner do preview
+
+                    const img = document.createElement('img');
+                    img.src = URL.createObjectURL(file);
+                    img.alt = file.name;
+                    img.className = 'img-fluid rounded';
+                    img.style.width = '100px';
+                    img.style.height = '100px';
+                    img.style.objectFit = 'cover';
+                    
+                    img.onload = () => {
+                        URL.revokeObjectURL(img.src); // Libera memória
+                    }
+
+                    const removeBtn = document.createElement('button');
+                    removeBtn.type = 'button';
+                    removeBtn.innerHTML = '&times;';
+                    removeBtn.className = 'btn btn-danger btn-sm position-absolute top-0 end-0 p-0 lh-1';
+                    removeBtn.style.fontSize = '0.8rem';
+                    removeBtn.style.width = '20px';
+                    removeBtn.style.height = '20px';
+                    removeBtn.title = `Remover ${file.name}`;
+
+
+                    removeBtn.addEventListener('click', () => {
+                        removeFileFromFileList(i);
+                        renderPreviews(); // Re-renderiza os previews
+                    });
+
+                    previewWrapper.appendChild(img);
+                    previewWrapper.appendChild(removeBtn);
+                    imagePreviewContainer.appendChild(previewWrapper);
+                }
+            }
+        }
+
+        function removeFileFromFileList(index) {
+            const newFilesList = new DataTransfer();
+            for (let i = 0; i < selectedFiles.files.length; i++) {
+                if (i !== index) {
+                    newFilesList.items.add(selectedFiles.files[i]);
+                }
+            }
+            selectedFiles = newFilesList;
+            // Atualiza o input de arquivo com a nova lista
+            productImagesInput.files = selectedFiles.files;
+        }
+        
+        // Renderiza inicialmente caso hajam arquivos (não aplicável para create, mas útil para edit)
+        renderPreviews(); 
+    }
+</script>
+
+<style>
+    .card-header {
+        font-weight: 500;
+    }
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+     .btn-primary:hover {
+        background-color: var(--secondary-color);
+        border-color: var(--secondary-color);
+    }
+</style> 

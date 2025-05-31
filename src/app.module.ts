@@ -6,6 +6,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { ProductsModule } from './products/products.module';
+import { PagesModule } from './pages/pages.module';
+import { AdminModule } from './admin/admin.module';
 import typeormOptions from './config/typeorm.config';
 
 @Module({
@@ -18,6 +20,8 @@ import typeormOptions from './config/typeorm.config';
     UsersModule,
     AuthModule,
     ProductsModule,
+    PagesModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

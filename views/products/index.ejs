@@ -1,5 +1,3 @@
-<%- include('../layouts/main') %>
-
 <div class="container py-5">
   <div class="row">
     <!-- Filtros -->
@@ -104,13 +102,33 @@
 
       <!-- Grid de Produtos -->
       <div class="row row-cols-1 row-cols-md-3 g-4">
-        <% products.forEach(product => { %>
+        <% products.forEach((product, index) => { %>
           <div class="col">
             <div class="card h-100">
               <% if (product.images && product.images.length > 0) { %>
-                <img src="/images/produtos/<%= product.images[0].filename %>" 
-                     class="card-img-top" 
-                     alt="<%= product.name %>">
+                <% if (product.images.length > 1) { %>
+                  <div id="carouselProduct_<%= product.id || index %>" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                      <% product.images.forEach((image, i) => { %>
+                        <div class="carousel-item <%= i === 0 ? 'active' : '' %>">
+                          <img src="<%= image.url %>" class="d-block w-100 card-img-top" alt="<%= product.name %> - Imagem <%= i + 1 %>">
+                        </div>
+                      <% }); %>
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselProduct_<%= product.id || index %>" data-bs-slide="prev">
+                      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                      <span class="visually-hidden">Anterior</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carouselProduct_<%= product.id || index %>" data-bs-slide="next">
+                      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                      <span class="visually-hidden">Próximo</span>
+                    </button>
+                  </div>
+                <% } else { %>
+                  <img src="<%= product.images[0].url %>" 
+                       class="card-img-top" 
+                       alt="<%= product.name %>">
+                <% } %>
               <% } else { %>
                 <img src="/images/placeholder.jpg" 
                      class="card-img-top" 

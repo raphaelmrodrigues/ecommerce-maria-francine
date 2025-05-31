@@ -212,8 +212,6 @@
     .btn-primary {
         background-color: #ff69b4;
         border-color: #ff69b4;
-        padding: 10px 20px;
-        border-radius: 10px;
         font-weight: 500;
         transition: all 0.3s ease;
     }
@@ -380,20 +378,34 @@
             // Validação do formulário
             const form = document.getElementById('registerForm');
             if (form) {
+                let isSubmitting = false;
                 form.addEventListener('submit', async function(event) {
                     event.preventDefault();
                     
+                    if (isSubmitting) return;
+
                     if (!form.checkValidity()) {
                         event.stopPropagation();
                         form.classList.add('was-validated');
                         return;
                     }
 
+                    isSubmitting = true;
+                    const submitButton = form.querySelector('button[type="submit"]');
+                    if (submitButton) submitButton.disabled = true;
+
                     try {
                         const formData = new FormData(form);
+                        const object = {};
+                        formData.forEach((value, key) => object[key] = value);
+                        const json = JSON.stringify(object);
+
                         const response = await fetch(form.action, {
                             method: 'POST',
-                            body: formData
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: json
                         });
 
                         const data = await response.json();
@@ -418,6 +430,9 @@
                             ${error.message}
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         `;
+                    } finally {
+                        isSubmitting = false;
+                        if (submitButton) submitButton.disabled = false;
                     }
                 });
                 console.log('Validação do formulário configurada');

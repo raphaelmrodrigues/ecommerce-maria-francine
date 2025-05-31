@@ -14,14 +14,14 @@
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
         <div class="container">
             <a class="navbar-brand" href="/">Maria Francine</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
                         <a class="nav-link" href="/">Início</a>
                     </li>
@@ -35,35 +35,38 @@
                         <a class="nav-link" href="/contact">Contato</a>
                     </li>
                 </ul>
-                <ul class="navbar-nav">
+                <div class="d-flex align-items-center" id="userNav">
                     <% if (locals.user) { %>
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user"></i> <%= user.name %>
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownServer" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user me-1"></i> <%= user.name.split(' ')[0] %>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="/auth/profile">Meu Perfil</a></li>
-                                <li><a class="dropdown-item" href="/orders">Meus Pedidos</a></li>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownServer">
+                                <li><a class="dropdown-item" href="/auth/profile"><i class="fas fa-id-card me-2"></i>Meu Perfil</a></li>
+                                <li><a class="dropdown-item" href="/orders"><i class="fas fa-box me-2"></i>Meus Pedidos</a></li>
+                                <li><a class="dropdown-item" href="/cart"><i class="fas fa-shopping-cart me-2"></i>Meu Carrinho</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="/auth/logout">Sair</a></li>
+                                <li><a class="dropdown-item logout-button-server" href="#"><i class="fas fa-sign-out-alt me-2"></i>Sair</a></li>
                             </ul>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="/cart">
-                                <i class="fas fa-shopping-cart"></i> Carrinho
+                                <i class="fas fa-shopping-cart"></i> <span class="d-none d-md-inline">Carrinho</span>
                             </a>
                         </li>
                     <% } else { %>
                         <li class="nav-item">
-                            <a class="nav-link" href="/auth/login">Login</a>
+                            <a class="nav-link" href="/auth/login"><i class="fas fa-sign-in-alt me-1"></i>Login</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/auth/register">Cadastro</a>
+                            <a class="nav-link" href="/auth/register"><i class="fas fa-user-plus me-1"></i>Cadastro</a>
                         </li>
                     <% } %>
-                </ul>
+                </div>
             </div>
         </div>
     </nav>
+
+    
 </body>
 </html> 

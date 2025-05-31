@@ -12,6 +12,6 @@ import { ProductImage } from '../database/entities/product-image.entity';
   ],
   providers: [ProductsService],
   controllers: [ProductsController],
-  exports: [ProductsService],
+  exports: [ProductsService, TypeOrmModule],
 })
 export class ProductsModule {} 

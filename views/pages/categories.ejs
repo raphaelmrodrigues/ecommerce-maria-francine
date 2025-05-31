@@ -1,0 +1,61 @@
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4 brand-logo"><%= title %></h1>
+        <p class="lead">Explore nossa coleção completa de categorias de vestidos infantis.</p>
+    </div>
+
+    <% if (categories && categories.length > 0) { %>
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+            <% categories.forEach(category => { %>
+                <div class="col">
+                    <a href="/produtos/categoria/<%= category.slug %>" class="text-decoration-none">
+                        <div class="card h-100 text-center category-card shadow-sm">
+                            <!-- Você pode adicionar uma imagem padrão para categorias ou buscar uma imagem da categoria se tiver -->
+                            <!-- <img src="/images/category-placeholder.jpg" class="card-img-top category-card-img" alt="<%= category.name %>"> -->
+                            <div class="card-body d-flex flex-column justify-content-center">
+                                <h5 class="card-title mb-0"><%= category.name %></h5>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            <% }); %>
+        </div>
+    <% } else { %>
+        <div class="text-center">
+            <p class="lead">Nenhuma categoria encontrada no momento.</p>
+            <i class="fas fa-tags fa-3x text-muted"></i>
+        </div>
+    <% } %>
+</div>
+
+<style>
+    .category-card {
+        border: none;
+        border-radius: 15px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        overflow: hidden; /* Para garantir que o border-radius seja aplicado na imagem se houver */
+    }
+    .category-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    }
+    .category-card-img {
+        height: 180px; /* Ajuste conforme necessário */
+        object-fit: cover;
+    }
+    .category-card .card-body {
+        background-color: var(--primary-color);
+        color: white;
+        min-height: 100px; /* Para manter uma altura consistente */
+    }
+    .category-card:hover .card-body {
+        background-color: var(--secondary-color);
+    }
+    .category-card .card-title {
+        font-weight: 600;
+    }
+    .brand-logo {
+      font-family: 'Dancing Script', cursive;
+      color: var(--primary-color);
+    }
+</style> 

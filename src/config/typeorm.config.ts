@@ -10,13 +10,15 @@ dotenv.config();
 
 import { AddUserFields1710000000000 } from '../database/migrations/1710000000000-AddUserFields';
 import { AddMissingUserFields1710000000001 } from '../database/migrations/1710000000001-AddMissingUserFields';
+import { AddUserRoleColumn1700000000002 } from '../database/migrations/1700000000002-AddUserRoleColumn';
 
 const migrations = [
   // Remova (ou comente) as migrations antigas:
   // AddProductFilters1709123456789,
   // InsertSampleData1709123456790,
   AddUserFields1710000000000,
-  AddMissingUserFields1710000000001
+  AddMissingUserFields1710000000001,
+  AddUserRoleColumn1700000000002
 ];
 
 const options: DataSourceOptions = {

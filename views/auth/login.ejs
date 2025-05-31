@@ -6,13 +6,16 @@
                 <div class="card-body p-5">
                     <h2 class="text-center mb-4">Login</h2>
                     
-                    <% if (typeof error !== 'undefined' && error) { %>
-                        <div class="alert alert-danger" role="alert">
-                            <%= error %>
+                    <% if (typeof error !== 'undefined' && error.length > 0) { %>
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <% error.forEach(function(msg){ %>
+                                <span><%= msg %></span><br>
+                            <% }); %>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                     <% } %>
 
-                    <form action="/auth/login" method="POST">
+                    <form action="/auth/login" method="POST" id="loginForm">
                         <div class="mb-3">
                             <label for="email" class="form-label">E-mail</label>
                             <input type="email" class="form-control" id="email" name="email" required>
@@ -26,7 +29,7 @@
                             <label class="form-check-label" for="remember">Lembrar-me</label>
                         </div>
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">Entrar</button>
+                            <button type="submit" class="btn btn-primary btn-primary-login">Entrar</button>
                         </div>
                     </form>
 
@@ -56,9 +59,84 @@
         border-color: var(--primary-color);
     }
     
-    .btn-primary {
+    .btn-primary-login {
         padding: 12px;
-        border-radius: 10px;
         font-weight: 500;
     }
 </style> 
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const loginForm = document.getElementById('loginForm');
+        if (!loginForm) {
+            console.error('Formulário de login #loginForm não encontrado.');
+            return;
+        }
+
+        let isSubmittingLogin = false;
+
+        loginForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            if (isSubmittingLogin) return;
+
+            let alertDiv = loginForm.parentNode.querySelector('.alert.alert-danger');
+            if (alertDiv) {
+                alertDiv.remove(); 
+            }
+
+            isSubmittingLogin = true;
+            const submitButton = loginForm.querySelector('button[type="submit"]');
+            if (submitButton) submitButton.disabled = true;
+
+            try {
+                const formData = new FormData(loginForm);
+                const object = {};
+                formData.forEach((value, key) => {
+                    if (value) { 
+                        object[key] = value;
+                    }
+                });
+                if (object.remember) {
+                    object.remember = true; 
+                }
+
+                const json = JSON.stringify(object);
+
+                const response = await fetch(loginForm.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: json
+                });
+
+                const data = await response.json(); 
+
+                if (!response.ok) {
+                    throw new Error(data.message || `Erro ${response.status}: Ocorreu um problema ao tentar fazer login.`);
+                }
+
+                console.log('Login bem-sucedido, redirecionando...');
+                window.location.href = '/'; 
+
+            } catch (error) {
+                alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+                alertDiv.setAttribute('role', 'alert');
+                
+                alertDiv.innerHTML = `
+                    ${error.message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+                loginForm.parentNode.insertBefore(alertDiv, loginForm);
+                
+                console.error('Erro no login:', error.message);
+
+            } finally {
+                isSubmittingLogin = false;
+                if (submitButton) submitButton.disabled = false;
+            }
+        });
+        console.log('Script de login (login.ejs) configurado.');
+    });
+</script> 

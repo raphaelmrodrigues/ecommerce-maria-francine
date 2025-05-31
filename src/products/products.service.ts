@@ -3,6 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like, Between, In, Not } from 'typeorm';
 import { Product } from '../database/entities/product.entity';
 import { Category } from '../database/entities/category.entity';
+import { ProductImage } from '../database/entities/product-image.entity';
+import { CreateProductDto } from './dto/create-product.dto';
+import { Express } from 'express';
 
 export interface ProductFilters {
   page: number;
@@ -28,7 +31,40 @@ export class ProductsService {
     private readonly productsRepository: Repository<Product>,
     @InjectRepository(Category)
     private categoriesRepository: Repository<Category>,
+    @InjectRepository(ProductImage)
+    private readonly productImageRepository: Repository<ProductImage>,
   ) {}
+
+  async create(createProductDto: CreateProductDto, productImages?: Array<Express.Multer.File>): Promise<Product> {
+    const { category_id, ...productData } = createProductDto;
+
+    const category = await this.categoriesRepository.findOneBy({ id: category_id });
+    if (!category) {
+      throw new NotFoundException(`Categoria com ID ${category_id} não encontrada.`);
+    }
+
+    delete productData.mainImageUrl;
+
+    const product = this.productsRepository.create({
+      ...productData,
+      category: category,
+    });
+
+    const savedProduct = await this.productsRepository.save(product);
+
+    if (productImages && productImages.length > 0) {
+      for (let i = 0; i < productImages.length; i++) {
+        const imageFile = productImages[i];
+        const newImage = this.productImageRepository.create({
+          url: `/uploads/products/${imageFile.filename}`,
+          product: savedProduct,
+          order: i + 1,
+        });
+        await this.productImageRepository.save(newImage);
+      }
+    }
+    return this.findOne(savedProduct.slug);
+  }
 
   async findAll(filters: ProductFilters): Promise<PaginatedResponse<Product>> {
     const queryBuilder = this.productsRepository
@@ -45,12 +81,24 @@ export class ProductsService {
       queryBuilder.andWhere('product.price <= :maxPrice', { maxPrice: filters.maxPrice });
     }
 
+    // Reabilitado para MySQL usando JSON_CONTAINS
     if (filters.sizes && filters.sizes.length > 0) {
-      queryBuilder.andWhere('product.sizes @> :sizes', { sizes: filters.sizes });
+      const sizeConditions = filters.sizes.map((size, index) => `JSON_CONTAINS(product.sizes, :sizeFilter${index})`).join(' OR ');
+      const sizeParameters = filters.sizes.reduce((params, size, index) => {
+        params[`sizeFilter${index}`] = JSON.stringify(size); // Garante que o valor seja uma string JSON válida (ex: "P")
+        return params;
+      }, {});
+      queryBuilder.andWhere(`(${sizeConditions})`, sizeParameters);
     }
 
+    // Reabilitado para MySQL usando JSON_CONTAINS
     if (filters.colors && filters.colors.length > 0) {
-      queryBuilder.andWhere('product.colors @> :colors', { colors: filters.colors });
+      const colorConditions = filters.colors.map((color, index) => `JSON_CONTAINS(product.colors, :colorFilter${index})`).join(' OR ');
+      const colorParameters = filters.colors.reduce((params, color, index) => {
+        params[`colorFilter${index}`] = JSON.stringify(color);
+        return params;
+      }, {});
+      queryBuilder.andWhere(`(${colorConditions})`, colorParameters);
     }
 
     if (filters.promoOnly) {

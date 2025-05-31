@@ -1,6 +1,12 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 import { Order } from './order.entity';
 
+// Definir o enum para papéis de usuário
+export enum UserRole {
+  ADMIN = 'admin',
+  USER = 'user',
+}
+
 @Entity({ name: 'users' }) // Define o nome da tabela como 'users'
 export class User {
   @PrimaryGeneratedColumn('uuid')
@@ -50,6 +56,13 @@ export class User {
 
   @Column({ length: 255, nullable: true }) // Endereço completo para compatibilidade
   address: string;
+
+  @Column({
+    type: 'enum',
+    enum: UserRole,
+    default: UserRole.USER,
+  })
+  role: UserRole;
 
   // Futuramente: roles, etc.
 

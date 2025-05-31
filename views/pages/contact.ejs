@@ -1,0 +1,149 @@
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4 brand-logo"><%= title %></h1>
+        <p class="lead text-muted">Adoraríamos ouvir de você! Entre em contato conosco.</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-body p-4 p-md-5">
+                    <form action="/contact/send" method="POST" id="contactForm">
+                        <div class="row gx-4 gy-3">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="contactName" name="name" placeholder="Seu Nome" required>
+                                    <label for="contactName">Seu Nome</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="email" class="form-control" id="contactEmail" name="email" placeholder="Seu Email" required>
+                                    <label for="contactEmail">Seu Email</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="contactSubject" name="subject" placeholder="Assunto" required>
+                                    <label for="contactSubject">Assunto</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-floating mb-3">
+                                    <textarea class="form-control" id="contactMessage" name="message" placeholder="Sua Mensagem" style="height: 150px;" required></textarea>
+                                    <label for="contactMessage">Sua Mensagem</label>
+                                </div>
+                            </div>
+                            <div class="col-12 text-center">
+                                <button type="submit" class="btn btn-primary btn-lg px-5">Enviar Mensagem</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5 justify-content-center text-center">
+        <div class="col-md-4 mb-4">
+            <div class="icon-box">
+                <i class="fas fa-phone fa-3x text-primary mb-3"></i>
+                <h4>Telefone</h4>
+                <p class="text-muted">(XX) XXXXX-XXXX</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="icon-box">
+                <i class="fas fa-envelope fa-3x text-primary mb-3"></i>
+                <h4>Email</h4>
+                <p class="text-muted">contato@mariafrancine.com.br</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="icon-box">
+                <i class="fas fa-map-marker-alt fa-3x text-primary mb-3"></i>
+                <h4>Endereço</h4>
+                <p class="text-muted">Rua Fictícia, 123, Bairro Imaginário<br>Cidade dos Sonhos, UF</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .brand-logo {
+      font-family: 'Dancing Script', cursive;
+      color: var(--primary-color);
+    }
+    .card {
+        background-color: #fff;
+        border-radius: 15px !important;
+    }
+    .form-control {
+        border-radius: 10px;
+    }
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem var(--secondary-color-alpha, rgba(255, 182, 193, 0.5)); /* Usando uma var ou fallback */
+    }
+    .form-floating > .form-control:focus ~ label,
+    .form-floating > .form-control:not(:placeholder-shown) ~ label {
+        color: var(--primary-color);
+    }
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+    .btn-primary:hover {
+        background-color: var(--secondary-color);
+        border-color: var(--secondary-color);
+    }
+    .icon-box {
+        padding: 20px;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const contactForm = document.getElementById('contactForm');
+    if(contactForm) {
+        contactForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const submitButton = contactForm.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.innerHTML;
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Enviando...';
+
+            const formData = new FormData(contactForm);
+            const data = Object.fromEntries(formData.entries());
+
+            //  NOTA: O endpoint /contact/send não existe ainda.
+            //  Esta é uma simulação de envio.
+            console.log('Dados do formulário de contato:', data);
+
+            // Simular um delay de envio
+            setTimeout(() => {
+                // Limpar formulário
+                contactForm.reset();
+                
+                // Restaurar botão
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalButtonText;
+
+                // Exibir mensagem de sucesso (simulada)
+                let successAlert = contactForm.parentNode.querySelector('.alert-success');
+                if (!successAlert) {
+                    successAlert = document.createElement('div');
+                    successAlert.className = 'alert alert-success mt-3';
+                    successAlert.setAttribute('role', 'alert');
+                    contactForm.parentNode.insertBefore(successAlert, contactForm.nextSibling);
+                }
+                successAlert.textContent = 'Mensagem enviada com sucesso! Entraremos em contato em breve.';
+                
+                // Remover alerta após alguns segundos
+                setTimeout(() => successAlert.remove(), 5000);
+
+            }, 1500);
+        });
+    }
+});
+</script> 

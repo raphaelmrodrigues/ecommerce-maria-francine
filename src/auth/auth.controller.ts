@@ -1,12 +1,12 @@
-import { Controller, Post, Body, UseGuards, HttpCode, HttpStatus, Get, Render, Res, Redirect, UnauthorizedException, Req } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, HttpCode, HttpStatus, Get, Render, Res, Redirect, UnauthorizedException, Req, BadRequestException, ConflictException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterAuthDto } from './dto/register-auth.dto';
 import { LoginAuthDto } from './dto/login-auth.dto';
-import { AuthGuard } from '@nestjs/passport';
 import { User } from '../database/entities/user.entity';
 import { Response, Request } from 'express';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { JwtAuthGuardOptional } from './guards/jwt-auth-optional.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -33,50 +33,68 @@ export class AuthController {
   }
 
   @Post('register')
-  @Redirect('/auth/login')
-  async register(@Body() registerDto: RegisterAuthDto, @Req() req: Request) {
+  @HttpCode(HttpStatus.CREATED)
+  async register(@Body() registerDto: RegisterAuthDto, @Req() req: Request, @Res() res: Response) {
     try {
-      console.log('Dados recebidos:', registerDto);
       await this.authService.register(registerDto);
-      req.flash('success', 'Cadastro realizado com sucesso! Faça login para continuar.');
+      return res.status(HttpStatus.CREATED).json({ message: 'Cadastro realizado com sucesso! Você será redirecionado para o login.' });
     } catch (error) {
-      console.error('Erro no registro:', error);
-      req.flash('error', error.message || 'Erro ao realizar cadastro');
-      req.flash('formData', registerDto);
-      throw new UnauthorizedException(error.message || 'Erro ao realizar cadastro');
+      if (error instanceof UnauthorizedException || error instanceof ConflictException || error instanceof BadRequestException) {
+        return res.status(error.getStatus()).json({ message: error.message, details: error.getResponse ? error.getResponse() : undefined });
+      }
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Erro interno ao processar o cadastro.', details: error.message });
     }
   }
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
+  @HttpCode(HttpStatus.OK)
   async login(
     @Body() loginDto: LoginAuthDto,
     @Req() req: Request & { user: Omit<User, 'password_hash'> },
-    @Res() res: Response,
+    @Res({ passthrough: true }) res: Response,
   ) {
     try {
-      const { access_token, user } = await this.authService.login(req.user);
+      console.log('[AuthController] Usuário autenticado pelo LocalAuthGuard:', req.user);
+      console.log('[AuthController] Login DTO (com remember):', loginDto);
+
+      const { access_token, user: loggedInUser } = await this.authService.login(req.user);
       
-      // Configurar cookie com o token JWT
+      console.log('[AuthController] Access Token gerado:', access_token);
+      console.log('[AuthController] Usuário logado (do authService.login):', loggedInUser);
+      
+      const oneDayInMs = 24 * 60 * 60 * 1000;
+      const thirtyDaysInMs = 30 * oneDayInMs;
+      const cookieMaxAge = loginDto.remember ? thirtyDaysInMs : oneDayInMs;
+
+      console.log(`[AuthController] Lembrar-me: ${loginDto.remember}. Duração do cookie: ${cookieMaxAge / oneDayInMs} dia(s)`);
+
       res.cookie('jwt', access_token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        maxAge: 24 * 60 * 60 * 1000, // 24 horas
+        maxAge: cookieMaxAge, 
+        path: '/',
       });
+      console.log('[AuthController] Cookie JWT configurado.');
 
-      // Redirecionar para a página inicial
-      res.redirect('/');
+      return { 
+        message: 'Login bem-sucedido!', 
+        user: loggedInUser 
+      };
+
     } catch (error) {
-      req.flash('error', error.message);
-      req.flash('email', loginDto.email);
-      res.redirect('/auth/login');
+      console.error('[AuthController] Erro interno durante o processo de login (após guarda):', error);
+      if (error instanceof UnauthorizedException || error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new UnauthorizedException('Falha ao processar o login após autenticação.');
     }
   }
 
   @Get('logout')
-  @Redirect('/')
   logout(@Res() res: Response) {
-    res.clearCookie('jwt');
+    res.clearCookie('jwt', { path: '/' });
+    return res.status(HttpStatus.OK).json({ message: 'Logout realizado com sucesso.' });
   }
 
   @UseGuards(JwtAuthGuard)
@@ -93,6 +111,19 @@ export class AuthController {
       error: req.flash('error'),
       success: req.flash('success'),
     };
+  }
+
+  @UseGuards(JwtAuthGuardOptional)
+  @Get('status')
+  async getAuthStatus(@Req() req: Request & { user?: Omit<User, 'password_hash'> }) {
+    console.log('[AuthController L:88] Chamada para /auth/status');
+    console.log('[AuthController L:89] Cookies na requisição /auth/status:', req.cookies);
+    console.log('[AuthController L:90] req.user em /auth/status (após JwtAuthGuardOptional):', req.user);
+    if (req.user) {
+      return { isAuthenticated: true, user: req.user };
+    } else {
+      return { isAuthenticated: false };
+    }
   }
 
   // Exemplo de rota protegida que requer um JWT válido

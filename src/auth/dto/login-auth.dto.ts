@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, MinLength, IsOptional, IsBoolean } from 'class-validator';
 
 export class LoginAuthDto {
   @IsNotEmpty({ message: 'O email não pode estar vazio.' })
@@ -9,4 +9,8 @@ export class LoginAuthDto {
   @IsString()
   @MinLength(6, { message: 'A senha deve ter pelo menos 6 caracteres.' })
   password: string;
+
+  @IsOptional()
+  @IsBoolean({ message: 'O campo Lembrar-me deve ser um booleano.' })
+  remember?: boolean;
 } 

@@ -1,0 +1,75 @@
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><%= title %></h1>
+        <a href="/admin/categories/create" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Adicionar Nova Categoria
+        </a>
+    </div>
+
+    <% if (locals.error && locals.error.length > 0) { %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <% locals.error.forEach(function(msg){ %><span><%= msg %></span><br><% }); %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <% } %>
+    <% if (locals.success && locals.success.length > 0) { %>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <% locals.success.forEach(function(msg){ %><span><%= msg %></span><br><% }); %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <% } %>
+
+    <% if (categories && categories.length > 0) { %>
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nome</th>
+                            <th>Slug</th>
+                            <th>Produtos</th>
+                            <th class="text-end">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% categories.forEach(category => { %>
+                            <tr>
+                                <td><%= category.name %></td>
+                                <td><%= category.slug %></td>
+                                <td><%= category.products ? category.products.length : 0 %></td> 
+                                <td class="text-end">
+                                    <a href="/admin/categories/edit/<%= category.id %>" class="btn btn-sm btn-outline-primary me-1">
+                                        <i class="fas fa-edit"></i> Editar
+                                    </a>
+                                    <form action="/admin/categories/delete/<%= category.id %>" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza que deseja excluir esta categoria?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-trash-alt"></i> Excluir
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    <% } else { %>
+        <div class="alert alert-info">
+            Nenhuma categoria encontrada. <a href="/admin/categories/create">Crie a primeira!</a>
+        </div>
+    <% } %>
+</div>
+
+<style>
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+     .btn-primary:hover {
+        background-color: var(--secondary-color);
+        border-color: var(--secondary-color);
+    }
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+</style> 
