@@ -24,10 +24,14 @@ async function bootstrap() {
   app.useStaticAssets(join(__dirname, '..', 'public'));
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
   app.setViewEngine('ejs');
+  
+  // Configuração do layout
   app.use(expressLayouts);
   app.set('layout', 'layouts/main');
   app.set('layout extractScripts', true);
   app.set('layout extractStyles', true);
+  app.set('layout extractMetas', true);
+  app.set('layout extractLinks', true);
 
   // Configurar sessão
   app.use(

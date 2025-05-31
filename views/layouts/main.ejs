@@ -3,14 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Maria Francine - Vestidos Infantis</title>
+    <title><%= typeof title !== 'undefined' ? title : 'Maria Francine - Vestidos Infantis' %></title>
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
+    
+    <%- style %>
     
     <style>
         :root {
@@ -191,9 +195,29 @@
         </div>
     </footer>
 
+    <!-- Scripts -->
+    <script>
+        console.log('Inicializando scripts...');
+    </script>
+    
+    <!-- jQuery (deve vir primeiro) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
     <!-- IMask -->
     <script src="https://unpkg.com/imask"></script>
+    
+    <!-- Scripts da página -->
+    <%- script %>
+    
+    <script>
+        console.log('Scripts carregados:', {
+            jQuery: typeof $ !== 'undefined',
+            IMask: typeof IMask !== 'undefined',
+            Bootstrap: typeof bootstrap !== 'undefined'
+        });
+    </script>
 </body>
 </html> 

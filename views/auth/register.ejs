@@ -1,22 +1,25 @@
-
-
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card shadow-sm">
                 <div class="card-body p-4">
-                    <h2 class="text-center mb-4">Criar Conta</h2>
+                    <h2 class="text-center mb-4">
+                        <i class="fas fa-user-plus me-2"></i>Criar Conta
+                    </h2>
                     
                     <% if (locals.error && error.length > 0) { %>
-                        <div class="alert alert-danger" role="alert">
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
                             <%= error %>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                     <% } %>
 
                     <form action="/auth/register" method="POST" id="registerForm" class="needs-validation" novalidate>
                         <!-- Dados Pessoais -->
                         <div class="mb-4">
-                            <h4 class="mb-3">Dados Pessoais</h4>
+                            <h4 class="mb-3 section-title">
+                                <i class="fas fa-user me-2"></i>Dados Pessoais
+                            </h4>
                             
                             <div class="mb-3">
                                 <label for="name" class="form-label">Nome Completo</label>
@@ -59,7 +62,9 @@
 
                         <!-- Endereço -->
                         <div class="mb-4">
-                            <h4 class="mb-3">Endereço</h4>
+                            <h4 class="mb-3 section-title">
+                                <i class="fas fa-map-marker-alt me-2"></i>Endereço
+                            </h4>
 
                             <div class="mb-3">
                                 <label for="country" class="form-label">País</label>
@@ -76,6 +81,12 @@
                                         <i class="bi bi-search"></i> Buscar
                                     </button>
                                 </div>
+                                <div class="form-text">
+                                    <a href="https://buscacepinter.correios.com.br/app/localidade_logradouro/index.php" 
+                                       target="_blank" class="text-decoration-none">
+                                        <i class="fas fa-question-circle me-1"></i>Não lembra seu CEP? Clique aqui
+                                    </a>
+                                </div>
                             </div>
 
                             <div class="mb-3">
@@ -89,6 +100,9 @@
                                     <label for="number" class="form-label">Número</label>
                                     <input type="text" class="form-control" id="number" name="number" required
                                         placeholder="Nº" value="<%= locals.number || '' %>">
+                                    <div class="form-text">
+                                        <i class="fas fa-info-circle me-1"></i>Digite 0 para S/N
+                                    </div>
                                 </div>
 
                                 <div class="col-md-8 mb-3">
@@ -164,7 +178,9 @@
                         </div>
 
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg">Criar Conta</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-user-plus me-2"></i>Criar Conta
+                            </button>
                         </div>
                     </form>
 
@@ -196,102 +212,237 @@
     .btn-primary {
         background-color: #ff69b4;
         border-color: #ff69b4;
-        padding: 12px;
+        padding: 10px 20px;
         border-radius: 10px;
         font-weight: 500;
+        transition: all 0.3s ease;
     }
 
     .btn-primary:hover {
         background-color: #ff4da6;
         border-color: #ff4da6;
+        transform: translateY(-1px);
+    }
+
+    .section-title {
+        color: #ff69b4;
+        font-weight: 600;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #ffb6c1;
+        margin-bottom: 20px;
     }
 
     .form-text {
         font-size: 0.85rem;
         color: #6c757d;
+        margin-top: 5px;
+    }
+
+    .form-text a {
+        color: #ff69b4;
+    }
+
+    .form-text a:hover {
+        color: #ff4da6;
+        text-decoration: underline !important;
     }
 
     .alert {
         border-radius: 10px;
+        border: none;
+        background-color: #fff5f7;
+        color: #dc3545;
+        border-left: 4px solid #dc3545;
+    }
+
+    .btn-outline-secondary {
+        border-color: #ff69b4;
+        color: #ff69b4;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #ff69b4;
+        border-color: #ff69b4;
+        color: white;
     }
 </style>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Máscaras usando IMask
-        const cpfMask = IMask(document.getElementById('cpf'), {
-            mask: '000.000.000-00'
-        });
+    // Função para inicializar as máscaras
+    function initializeMasks() {
+        console.log('Inicializando máscaras...');
+        
+        try {
+            // Máscaras usando IMask
+            const cpfInput = document.getElementById('cpf');
+            const phoneInput = document.getElementById('phone');
+            const zipCodeInput = document.getElementById('zip_code');
 
-        const phoneMask = IMask(document.getElementById('phone'), {
-            mask: '(00) 00000-0000'
-        });
-
-        const zipCodeMask = IMask(document.getElementById('zip_code'), {
-            mask: '00000-000'
-        });
-
-        // Validação de senha em tempo real
-        const password = document.getElementById('password');
-        const confirmPassword = document.getElementById('confirmPassword');
-        const passwordMatch = document.getElementById('passwordMatch');
-
-        confirmPassword.addEventListener('input', function() {
-            if (password.value === this.value) {
-                passwordMatch.className = 'form-text text-success';
-                passwordMatch.textContent = 'As senhas coincidem';
-            } else {
-                passwordMatch.className = 'form-text text-danger';
-                passwordMatch.textContent = 'As senhas não coincidem';
-            }
-        });
-
-        // Busca de CEP
-        const searchCepButton = document.getElementById('searchCep');
-        const zipCodeInput = document.getElementById('zip_code');
-
-        searchCepButton.addEventListener('click', function() {
-            const cep = zipCodeInput.value.replace(/\D/g, '');
-            
-            if (cep.length !== 8) {
-                alert('CEP inválido');
+            if (!cpfInput || !phoneInput || !zipCodeInput) {
+                console.error('Elementos de input não encontrados:', {
+                    cpf: !!cpfInput,
+                    phone: !!phoneInput,
+                    zipCode: !!zipCodeInput
+                });
                 return;
             }
 
-            this.disabled = true;
-            this.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Buscando...';
+            // Aplicar máscaras
+            const masks = {
+                cpf: IMask(cpfInput, {
+                    mask: '000.000.000-00'
+                }),
+                phone: IMask(phoneInput, {
+                    mask: '(00) 00000-0000'
+                }),
+                zipCode: IMask(zipCodeInput, {
+                    mask: '00000-000'
+                })
+            };
 
-            fetch(`https://viacep.com.br/ws/${cep}/json/`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.erro) {
-                        throw new Error('CEP não encontrado');
+            console.log('Máscaras aplicadas:', Object.keys(masks));
+
+            // Validação de senha em tempo real
+            const password = document.getElementById('password');
+            const confirmPassword = document.getElementById('confirmPassword');
+            const passwordMatch = document.getElementById('passwordMatch');
+
+            if (password && confirmPassword && passwordMatch) {
+                confirmPassword.addEventListener('input', function() {
+                    if (password.value === this.value) {
+                        passwordMatch.className = 'form-text text-success';
+                        passwordMatch.textContent = 'As senhas coincidem';
+                    } else {
+                        passwordMatch.className = 'form-text text-danger';
+                        passwordMatch.textContent = 'As senhas não coincidem';
+                    }
+                });
+                console.log('Validação de senha configurada');
+            }
+
+            // Busca de CEP
+            const searchCepButton = document.getElementById('searchCep');
+            
+            if (searchCepButton) {
+                searchCepButton.addEventListener('click', function() {
+                    console.log('Botão de busca CEP clicado');
+                    const cep = zipCodeInput.value.replace(/\D/g, '');
+                    
+                    if (cep.length !== 8) {
+                        alert('CEP inválido');
+                        return;
                     }
 
-                    document.getElementById('street').value = data.logradouro;
-                    document.getElementById('neighborhood').value = data.bairro;
-                    document.getElementById('city').value = data.localidade;
-                    document.getElementById('state').value = data.uf;
-                    document.getElementById('number').focus();
-                })
-                .catch(error => {
-                    alert(error.message || 'Erro ao buscar CEP');
-                })
-                .finally(() => {
-                    this.disabled = false;
-                    this.innerHTML = '<i class="bi bi-search"></i> Buscar';
-                });
-        });
+                    this.disabled = true;
+                    this.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Buscando...';
 
-        // Validação do formulário
-        const form = document.getElementById('registerForm');
-        form.addEventListener('submit', function(event) {
-            if (!form.checkValidity()) {
-                event.preventDefault();
-                event.stopPropagation();
+                    fetch(`https://viacep.com.br/ws/${cep}/json/`)
+                        .then(response => {
+                            console.log('Resposta da API:', response.status);
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log('Dados recebidos:', data);
+                            if (data.erro) {
+                                throw new Error('CEP não encontrado');
+                            }
+
+                            const fields = {
+                                street: document.getElementById('street'),
+                                neighborhood: document.getElementById('neighborhood'),
+                                city: document.getElementById('city'),
+                                state: document.getElementById('state')
+                            };
+
+                            if (fields.street) fields.street.value = data.logradouro || '';
+                            if (fields.neighborhood) fields.neighborhood.value = data.bairro || '';
+                            if (fields.city) fields.city.value = data.localidade || '';
+                            if (fields.state) fields.state.value = data.uf || '';
+
+                            const numberField = document.getElementById('number');
+                            if (numberField) numberField.focus();
+                        })
+                        .catch(error => {
+                            console.error('Erro na busca do CEP:', error);
+                            alert(error.message || 'Erro ao buscar CEP');
+                        })
+                        .finally(() => {
+                            this.disabled = false;
+                            this.innerHTML = '<i class="bi bi-search"></i> Buscar';
+                        });
+                });
+                console.log('Busca de CEP configurada');
             }
-            form.classList.add('was-validated');
-        });
+
+            // Validação do formulário
+            const form = document.getElementById('registerForm');
+            if (form) {
+                form.addEventListener('submit', async function(event) {
+                    event.preventDefault();
+                    
+                    if (!form.checkValidity()) {
+                        event.stopPropagation();
+                        form.classList.add('was-validated');
+                        return;
+                    }
+
+                    try {
+                        const formData = new FormData(form);
+                        const response = await fetch(form.action, {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        const data = await response.json();
+
+                        if (!response.ok) {
+                            throw new Error(data.message || 'Erro ao realizar cadastro');
+                        }
+
+                        // Se chegou aqui, o cadastro foi bem sucedido
+                        window.location.href = '/auth/login';
+                    } catch (error) {
+                        // Criar ou atualizar o alerta de erro
+                        let alertDiv = document.querySelector('.alert');
+                        if (!alertDiv) {
+                            alertDiv = document.createElement('div');
+                            alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+                            alertDiv.setAttribute('role', 'alert');
+                            form.insertBefore(alertDiv, form.firstChild);
+                        }
+
+                        alertDiv.innerHTML = `
+                            ${error.message}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        `;
+                    }
+                });
+                console.log('Validação do formulário configurada');
+            }
+
+        } catch (error) {
+            console.error('Erro ao inicializar as máscaras:', error);
+        }
+    }
+
+    // Aguarda o DOM estar completamente carregado
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeMasks);
+    } else {
+        initializeMasks();
+    }
+
+    // Backup: tenta inicializar novamente quando a página estiver totalmente carregada
+    window.addEventListener('load', function() {
+        console.log('Página totalmente carregada, verificando máscaras...');
+        if (typeof IMask === 'undefined') {
+            console.error('IMask ainda não está disponível!');
+        } else {
+            initializeMasks();
+        }
     });
 </script>
 
