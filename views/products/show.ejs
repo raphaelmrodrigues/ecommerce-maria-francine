@@ -1,0 +1,263 @@
+<%- include('../layouts/main') %>
+
+<div class="container py-4">
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/">Início</a></li>
+      <li class="breadcrumb-item"><a href="/produtos">Produtos</a></li>
+      <li class="breadcrumb-item"><a href="/produtos/categoria/<%= produto.category.slug %>"><%= produto.category.name %></a></li>
+      <li class="breadcrumb-item active" aria-current="page"><%= produto.name %></li>
+    </ol>
+  </nav>
+
+  <div class="row">
+    <!-- Galeria de Imagens -->
+    <div class="col-md-6 mb-4">
+      <div id="productCarousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+          <% if (produto.images && produto.images.length > 0) { %>
+            <% produto.images.forEach((image, index) => { %>
+              <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                <img src="/images/produtos/<%= image.filename %>" class="d-block w-100" alt="<%= produto.name %>">
+              </div>
+            <% }); %>
+          <% } else { %>
+            <div class="carousel-item active">
+              <img src="/images/placeholder.jpg" class="d-block w-100" alt="<%= produto.name %>">
+            </div>
+          <% } %>
+        </div>
+        <% if (produto.images && produto.images.length > 1) { %>
+          <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Anterior</span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Próximo</span>
+          </button>
+        <% } %>
+      </div>
+
+      <!-- Miniaturas -->
+      <% if (produto.images && produto.images.length > 1) { %>
+        <div class="row mt-3">
+          <% produto.images.forEach((image, index) => { %>
+            <div class="col-3">
+              <img src="/images/produtos/<%= image.filename %>" 
+                   class="img-thumbnail cursor-pointer" 
+                   alt="<%= produto.name %>"
+                   onclick="$('#productCarousel').carousel(<%= index %>)">
+            </div>
+          <% }); %>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Informações do Produto -->
+    <div class="col-md-6">
+      <h1 class="h2 mb-3"><%= produto.name %></h1>
+      
+      <div class="mb-3">
+        <span class="category-badge"><%= produto.category.name %></span>
+        <% if (produto.on_sale) { %>
+          <span class="badge bg-danger ms-2">Promoção</span>
+        <% } %>
+      </div>
+
+      <div class="mb-4">
+        <% if (produto.on_sale && produto.sale_price) { %>
+          <div class="d-flex align-items-center">
+            <span class="text-decoration-line-through text-muted h4 mb-0">R$ <%= produto.price.toFixed(2) %></span>
+            <span class="price h2 mb-0 ms-3">R$ <%= produto.sale_price.toFixed(2) %></span>
+          </div>
+        <% } else { %>
+          <span class="price h2 mb-0">R$ <%= produto.price.toFixed(2) %></span>
+        <% } %>
+      </div>
+
+      <div class="mb-4">
+        <h5>Descrição</h5>
+        <p class="text-muted"><%= produto.description %></p>
+      </div>
+
+      <div class="mb-4">
+        <h5>Detalhes do Produto</h5>
+        <ul class="list-unstyled">
+          <li><i class="fas fa-check text-success me-2"></i> Tecido de alta qualidade</li>
+          <li><i class="fas fa-check text-success me-2"></i> Acabamento impecável</li>
+          <li><i class="fas fa-check text-success me-2"></i> Lavável à máquina</li>
+          <li><i class="fas fa-check text-success me-2"></i> Entrega para todo o Brasil</li>
+        </ul>
+      </div>
+
+      <div class="mb-4">
+        <h5>Tamanho</h5>
+        <div class="btn-group" role="group">
+          <% if (produto.sizes && produto.sizes.length > 0) { %>
+            <% produto.sizes.forEach(size => { %>
+              <input type="radio" class="btn-check" name="size" id="size<%= size %>" value="<%= size %>">
+              <label class="btn btn-outline-primary" for="size<%= size %>"><%= size %></label>
+            <% }); %>
+          <% } %>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <h5>Quantidade</h5>
+        <div class="input-group" style="width: 150px;">
+          <button class="btn btn-outline-secondary" type="button" onclick="updateQuantity(-1)">-</button>
+          <input type="number" class="form-control text-center" id="quantity" value="1" min="1" max="<%= produto.stock_quantity %>">
+          <button class="btn btn-outline-secondary" type="button" onclick="updateQuantity(1)">+</button>
+        </div>
+        <small class="text-muted">Disponível: <%= produto.stock_quantity %> unidades</small>
+      </div>
+
+      <div class="d-grid gap-2">
+        <button class="btn btn-primary btn-lg" onclick="addToCart()">
+          <i class="fas fa-shopping-cart me-2"></i> Adicionar ao Carrinho
+        </button>
+        <button class="btn btn-outline-primary btn-lg" onclick="buyNow()">
+          <i class="fas fa-bolt me-2"></i> Comprar Agora
+        </button>
+      </div>
+
+      <!-- Compartilhar -->
+      <div class="mt-4">
+        <h5>Compartilhar</h5>
+        <div class="social-icons">
+          <a href="#" onclick="shareOnFacebook()"><i class="fab fa-facebook"></i></a>
+          <a href="#" onclick="shareOnWhatsApp()"><i class="fab fa-whatsapp"></i></a>
+          <a href="#" onclick="shareOnInstagram()"><i class="fab fa-instagram"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Produtos Relacionados -->
+  <section class="related-products mt-5">
+    <h3 class="mb-4">Produtos Relacionados</h3>
+    <div class="row g-4">
+      <!-- Aqui virão os produtos relacionados -->
+    </div>
+  </section>
+</div>
+
+<style>
+  .category-badge {
+    background-color: var(--accent-color);
+    color: var(--text-color);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+  }
+
+  .price {
+    color: var(--primary-color);
+    font-weight: 600;
+  }
+
+  .btn-check:checked + .btn-outline-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+  }
+
+  .social-icons a {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    margin-right: 1rem;
+    transition: color 0.3s ease;
+  }
+
+  .social-icons a:hover {
+    color: var(--secondary-color);
+  }
+
+  .img-thumbnail {
+    border: 2px solid transparent;
+    transition: border-color 0.3s ease;
+  }
+
+  .img-thumbnail:hover {
+    border-color: var(--primary-color);
+  }
+
+  .cursor-pointer {
+    cursor: pointer;
+  }
+
+  .carousel-item img {
+    object-fit: cover;
+    height: 400px;
+  }
+
+  .img-thumbnail {
+    height: 80px;
+    object-fit: cover;
+  }
+
+  .btn-check:checked + .btn-outline-primary {
+    background-color: var(--bs-primary);
+    color: white;
+  }
+</style>
+
+<script>
+  function updateQuantity(delta) {
+    const input = document.getElementById('quantity');
+    const currentValue = parseInt(input.value);
+    const maxValue = parseInt(input.max);
+    const newValue = currentValue + delta;
+    
+    if (newValue >= 1 && newValue <= maxValue) {
+      input.value = newValue;
+    }
+  }
+
+  function addToCart() {
+    const size = document.querySelector('input[name="size"]:checked')?.value;
+    const color = document.querySelector('input[name="color"]:checked')?.value;
+    const quantity = document.getElementById('quantity').value;
+
+    if (!size) {
+      alert('Por favor, selecione um tamanho');
+      return;
+    }
+
+    if (!color) {
+      alert('Por favor, selecione uma cor');
+      return;
+    }
+
+    // TODO: Implementar adição ao carrinho
+    alert('Produto adicionado ao carrinho!');
+  }
+
+  function buyNow() {
+    const size = document.querySelector('input[name="size"]:checked')?.value;
+    const quantity = document.getElementById('quantity').value;
+    
+    if (!size) {
+      alert('Por favor, selecione um tamanho');
+      return;
+    }
+
+    // Aqui virá a lógica de compra imediata
+    console.log('Comprar agora:', { size, quantity });
+  }
+
+  function shareOnFacebook() {
+    const url = encodeURIComponent(window.location.href);
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+  }
+
+  function shareOnWhatsApp() {
+    const text = encodeURIComponent(`Confira este lindo vestido: ${window.location.href}`);
+    window.open(`https://wa.me/?text=${text}`, '_blank');
+  }
+
+  function shareOnInstagram() {
+    // Instagram não permite compartilhamento direto via URL
+    alert('Copie o link e compartilhe no Instagram');
+  }
+</script> 

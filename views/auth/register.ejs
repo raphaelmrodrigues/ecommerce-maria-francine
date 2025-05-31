@@ -1,0 +1,297 @@
+
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="text-center mb-4">Criar Conta</h2>
+                    
+                    <% if (locals.error && error.length > 0) { %>
+                        <div class="alert alert-danger" role="alert">
+                            <%= error %>
+                        </div>
+                    <% } %>
+
+                    <form action="/auth/register" method="POST" id="registerForm" class="needs-validation" novalidate>
+                        <!-- Dados Pessoais -->
+                        <div class="mb-4">
+                            <h4 class="mb-3">Dados Pessoais</h4>
+                            
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Nome Completo</label>
+                                <input type="text" class="form-control" id="name" name="name" required
+                                    minlength="3" maxlength="100" value="<%= locals.name || '' %>">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" required
+                                    value="<%= locals.email || '' %>">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="cpf" class="form-label">CPF</label>
+                                <input type="text" class="form-control" id="cpf" name="cpf" required
+                                    placeholder="000.000.000-00" value="<%= locals.cpf || '' %>">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">Telefone</label>
+                                <input type="text" class="form-control" id="phone" name="phone" required
+                                    placeholder="(00) 00000-0000" value="<%= locals.phone || '' %>">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Senha</label>
+                                <input type="password" class="form-control" id="password" name="password" required
+                                    minlength="6" maxlength="50">
+                                <div class="form-text">A senha deve ter pelo menos 6 caracteres.</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="confirmPassword" class="form-label">Confirmar Senha</label>
+                                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required
+                                    minlength="6" maxlength="50">
+                                <div id="passwordMatch" class="form-text"></div>
+                            </div>
+                        </div>
+
+                        <!-- Endereço -->
+                        <div class="mb-4">
+                            <h4 class="mb-3">Endereço</h4>
+
+                            <div class="mb-3">
+                                <label for="country" class="form-label">País</label>
+                                <input type="text" class="form-control" id="country" name="country" required
+                                    value="BR" readonly>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="zip_code" class="form-label">CEP</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="zip_code" name="zip_code" required
+                                        placeholder="00000-000" value="<%= locals.zip_code || '' %>">
+                                    <button class="btn btn-outline-secondary" type="button" id="searchCep">
+                                        <i class="bi bi-search"></i> Buscar
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="street" class="form-label">Logradouro</label>
+                                <input type="text" class="form-control" id="street" name="street" required
+                                    value="<%= locals.street || '' %>">
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="number" class="form-label">Número</label>
+                                    <input type="text" class="form-control" id="number" name="number" required
+                                        placeholder="Nº" value="<%= locals.number || '' %>">
+                                </div>
+
+                                <div class="col-md-8 mb-3">
+                                    <label for="complement" class="form-label">Complemento</label>
+                                    <input type="text" class="form-control" id="complement" name="complement"
+                                        placeholder="Apto" value="<%= locals.complement || '' %>">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="neighborhood" class="form-label">Bairro</label>
+                                <input type="text" class="form-control" id="neighborhood" name="neighborhood" required
+                                    value="<%= locals.neighborhood || '' %>">
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="city" class="form-label">Cidade</label>
+                                    <input type="text" class="form-control" id="city" name="city" required
+                                        value="<%= locals.city || '' %>">
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="state" class="form-label">Estado</label>
+                                    <select class="form-select" id="state" name="state" required>
+                                        <option value="">Selecione...</option>
+                                        <option value="AC" <%= locals.state === 'AC' ? 'selected' : '' %>>Acre</option>
+                                        <option value="AL" <%= locals.state === 'AL' ? 'selected' : '' %>>Alagoas</option>
+                                        <option value="AP" <%= locals.state === 'AP' ? 'selected' : '' %>>Amapá</option>
+                                        <option value="AM" <%= locals.state === 'AM' ? 'selected' : '' %>>Amazonas</option>
+                                        <option value="BA" <%= locals.state === 'BA' ? 'selected' : '' %>>Bahia</option>
+                                        <option value="CE" <%= locals.state === 'CE' ? 'selected' : '' %>>Ceará</option>
+                                        <option value="DF" <%= locals.state === 'DF' ? 'selected' : '' %>>Distrito Federal</option>
+                                        <option value="ES" <%= locals.state === 'ES' ? 'selected' : '' %>>Espírito Santo</option>
+                                        <option value="GO" <%= locals.state === 'GO' ? 'selected' : '' %>>Goiás</option>
+                                        <option value="MA" <%= locals.state === 'MA' ? 'selected' : '' %>>Maranhão</option>
+                                        <option value="MT" <%= locals.state === 'MT' ? 'selected' : '' %>>Mato Grosso</option>
+                                        <option value="MS" <%= locals.state === 'MS' ? 'selected' : '' %>>Mato Grosso do Sul</option>
+                                        <option value="MG" <%= locals.state === 'MG' ? 'selected' : '' %>>Minas Gerais</option>
+                                        <option value="PA" <%= locals.state === 'PA' ? 'selected' : '' %>>Pará</option>
+                                        <option value="PB" <%= locals.state === 'PB' ? 'selected' : '' %>>Paraíba</option>
+                                        <option value="PR" <%= locals.state === 'PR' ? 'selected' : '' %>>Paraná</option>
+                                        <option value="PE" <%= locals.state === 'PE' ? 'selected' : '' %>>Pernambuco</option>
+                                        <option value="PI" <%= locals.state === 'PI' ? 'selected' : '' %>>Piauí</option>
+                                        <option value="RJ" <%= locals.state === 'RJ' ? 'selected' : '' %>>Rio de Janeiro</option>
+                                        <option value="RN" <%= locals.state === 'RN' ? 'selected' : '' %>>Rio Grande do Norte</option>
+                                        <option value="RS" <%= locals.state === 'RS' ? 'selected' : '' %>>Rio Grande do Sul</option>
+                                        <option value="RO" <%= locals.state === 'RO' ? 'selected' : '' %>>Rondônia</option>
+                                        <option value="RR" <%= locals.state === 'RR' ? 'selected' : '' %>>Roraima</option>
+                                        <option value="SC" <%= locals.state === 'SC' ? 'selected' : '' %>>Santa Catarina</option>
+                                        <option value="SP" <%= locals.state === 'SP' ? 'selected' : '' %>>São Paulo</option>
+                                        <option value="SE" <%= locals.state === 'SE' ? 'selected' : '' %>>Sergipe</option>
+                                        <option value="TO" <%= locals.state === 'TO' ? 'selected' : '' %>>Tocantins</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="address_name" class="form-label">Nome do Endereço</label>
+                                <input type="text" class="form-control" id="address_name" name="address_name" required
+                                    placeholder="Ex: Casa, Trabalho, etc." value="<%= locals.address_name || '' %>">
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="terms" name="terms" required>
+                                <label class="form-check-label" for="terms">
+                                    Li e aceito os <a href="/termos" target="_blank">Termos de Uso</a> e a 
+                                    <a href="/privacidade" target="_blank">Política de Privacidade</a>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">Criar Conta</button>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-4">
+                        <p class="mb-0">Já tem uma conta? <a href="/auth/login">Faça login</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border: none;
+        border-radius: 15px;
+    }
+    
+    .form-control {
+        border-radius: 10px;
+        padding: 12px;
+    }
+    
+    .form-control:focus {
+        box-shadow: 0 0 0 0.2rem rgba(255, 105, 180, 0.25);
+        border-color: #ff69b4;
+    }
+    
+    .btn-primary {
+        background-color: #ff69b4;
+        border-color: #ff69b4;
+        padding: 12px;
+        border-radius: 10px;
+        font-weight: 500;
+    }
+
+    .btn-primary:hover {
+        background-color: #ff4da6;
+        border-color: #ff4da6;
+    }
+
+    .form-text {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+
+    .alert {
+        border-radius: 10px;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Máscaras usando IMask
+        const cpfMask = IMask(document.getElementById('cpf'), {
+            mask: '000.000.000-00'
+        });
+
+        const phoneMask = IMask(document.getElementById('phone'), {
+            mask: '(00) 00000-0000'
+        });
+
+        const zipCodeMask = IMask(document.getElementById('zip_code'), {
+            mask: '00000-000'
+        });
+
+        // Validação de senha em tempo real
+        const password = document.getElementById('password');
+        const confirmPassword = document.getElementById('confirmPassword');
+        const passwordMatch = document.getElementById('passwordMatch');
+
+        confirmPassword.addEventListener('input', function() {
+            if (password.value === this.value) {
+                passwordMatch.className = 'form-text text-success';
+                passwordMatch.textContent = 'As senhas coincidem';
+            } else {
+                passwordMatch.className = 'form-text text-danger';
+                passwordMatch.textContent = 'As senhas não coincidem';
+            }
+        });
+
+        // Busca de CEP
+        const searchCepButton = document.getElementById('searchCep');
+        const zipCodeInput = document.getElementById('zip_code');
+
+        searchCepButton.addEventListener('click', function() {
+            const cep = zipCodeInput.value.replace(/\D/g, '');
+            
+            if (cep.length !== 8) {
+                alert('CEP inválido');
+                return;
+            }
+
+            this.disabled = true;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Buscando...';
+
+            fetch(`https://viacep.com.br/ws/${cep}/json/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.erro) {
+                        throw new Error('CEP não encontrado');
+                    }
+
+                    document.getElementById('street').value = data.logradouro;
+                    document.getElementById('neighborhood').value = data.bairro;
+                    document.getElementById('city').value = data.localidade;
+                    document.getElementById('state').value = data.uf;
+                    document.getElementById('number').focus();
+                })
+                .catch(error => {
+                    alert(error.message || 'Erro ao buscar CEP');
+                })
+                .finally(() => {
+                    this.disabled = false;
+                    this.innerHTML = '<i class="bi bi-search"></i> Buscar';
+                });
+        });
+
+        // Validação do formulário
+        const form = document.getElementById('registerForm');
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        });
+    });
+</script>
+

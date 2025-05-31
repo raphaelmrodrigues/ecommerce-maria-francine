@@ -1,0 +1,251 @@
+<%- include('../layouts/main') %>
+
+<div class="container py-4">
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/">Início</a></li>
+      <li class="breadcrumb-item"><a href="/produtos">Produtos</a></li>
+      <li class="breadcrumb-item active" aria-current="page"><%= title %></li>
+    </ol>
+  </nav>
+
+  <div class="row">
+    <!-- Filtros -->
+    <div class="col-lg-3">
+      <div class="card mb-4">
+        <div class="card-body">
+          <h5 class="card-title mb-3">Filtros</h5>
+          
+          <!-- Preço -->
+          <div class="mb-4">
+            <h6>Preço</h6>
+            <div class="range-slider">
+              <input type="range" class="form-range" min="0" max="1000" step="10" id="priceRange">
+              <div class="d-flex justify-content-between mt-2">
+                <span>R$ 0</span>
+                <span id="priceValue">R$ 500</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tamanho -->
+          <div class="mb-4">
+            <h6>Tamanho</h6>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="2" id="size2">
+              <label class="form-check-label" for="size2">2 anos</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="4" id="size4">
+              <label class="form-check-label" for="size4">4 anos</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="6" id="size6">
+              <label class="form-check-label" for="size6">6 anos</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="8" id="size8">
+              <label class="form-check-label" for="size8">8 anos</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="10" id="size10">
+              <label class="form-check-label" for="size10">10 anos</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="12" id="size12">
+              <label class="form-check-label" for="size12">12 anos</label>
+            </div>
+          </div>
+
+          <!-- Cor -->
+          <div class="mb-4">
+            <h6>Cor</h6>
+            <div class="color-options">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="rosa" id="colorPink">
+                <label class="form-check-label" for="colorPink">Rosa</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="azul" id="colorBlue">
+                <label class="form-check-label" for="colorBlue">Azul</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="vermelho" id="colorRed">
+                <label class="form-check-label" for="colorRed">Vermelho</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="branco" id="colorWhite">
+                <label class="form-check-label" for="colorWhite">Branco</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Promoções -->
+          <div class="mb-4">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="promo" id="promoOnly">
+              <label class="form-check-label" for="promoOnly">Apenas Promoções</label>
+            </div>
+          </div>
+
+          <button class="btn btn-primary w-100" onclick="applyFilters()">
+            Aplicar Filtros
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista de Produtos -->
+    <div class="col-lg-9">
+      <!-- Cabeçalho -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0"><%= title %></h1>
+        <div class="d-flex align-items-center">
+          <select class="form-select me-2" onchange="sortProducts(this.value)">
+            <option value="relevance">Relevância</option>
+            <option value="price_asc">Menor Preço</option>
+            <option value="price_desc">Maior Preço</option>
+            <option value="newest">Mais Recentes</option>
+          </select>
+          <div class="btn-group" role="group">
+            <button type="button" class="btn btn-outline-primary active" onclick="changeView('grid')">
+              <i class="fas fa-th"></i>
+            </button>
+            <button type="button" class="btn btn-outline-primary" onclick="changeView('list')">
+              <i class="fas fa-list"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grid de Produtos -->
+      <div class="row g-4" id="productsGrid">
+        <% if (products && products.length > 0) { %>
+          <% products.forEach(product => { %>
+            <div class="col-md-4">
+              <div class="card h-100 product-card">
+                <% if (product.on_sale) { %>
+                  <div class="badge bg-danger position-absolute top-0 end-0 m-2">Promoção</div>
+                <% } %>
+                <img src="<%= product.images[0] %>" class="card-img-top" alt="<%= product.name %>" style="height: 300px; object-fit: cover;">
+                <div class="card-body">
+                  <h5 class="card-title"><%= product.name %></h5>
+                  <p class="card-text text-muted"><%= product.description.substring(0, 100) %>...</p>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <% if (product.on_sale && product.sale_price) { %>
+                      <div>
+                        <span class="text-decoration-line-through text-muted">R$ <%= product.price.toFixed(2) %></span>
+                        <span class="price h5 mb-0 ms-2">R$ <%= product.sale_price.toFixed(2) %></span>
+                      </div>
+                    <% } else { %>
+                      <span class="price h5 mb-0">R$ <%= product.price.toFixed(2) %></span>
+                    <% } %>
+                    <a href="/produtos/<%= product.slug %>" class="btn btn-primary">
+                      Ver Detalhes
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% }); %>
+        <% } else { %>
+          <div class="col-12">
+            <div class="alert alert-info">
+              Nenhum produto encontrado nesta categoria.
+            </div>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Paginação -->
+      <% if (products && products.length > 0) { %>
+        <nav class="mt-4">
+          <ul class="pagination justify-content-center">
+            <li class="page-item disabled">
+              <a class="page-link" href="#" tabindex="-1">Anterior</a>
+            </li>
+            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+            <li class="page-item"><a class="page-link" href="#">2</a></li>
+            <li class="page-item"><a class="page-link" href="#">3</a></li>
+            <li class="page-item">
+              <a class="page-link" href="#">Próximo</a>
+            </li>
+          </ul>
+        </nav>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<style>
+  .product-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  .price {
+    color: var(--primary-color);
+    font-weight: 600;
+  }
+
+  .range-slider {
+    padding: 0 10px;
+  }
+
+  .form-check {
+    margin-bottom: 0.5rem;
+  }
+
+  .color-options .form-check {
+    display: flex;
+    align-items: center;
+  }
+
+  .color-options .form-check-input {
+    margin-right: 0.5rem;
+  }
+</style>
+
+<script>
+  // Atualiza o valor do preço no slider
+  document.getElementById('priceRange').addEventListener('input', function(e) {
+    document.getElementById('priceValue').textContent = `R$ ${e.target.value}`;
+  });
+
+  function applyFilters() {
+    const price = document.getElementById('priceRange').value;
+    const sizes = Array.from(document.querySelectorAll('input[type="checkbox"][id^="size"]:checked'))
+      .map(cb => cb.value);
+    const colors = Array.from(document.querySelectorAll('input[type="checkbox"][id^="color"]:checked'))
+      .map(cb => cb.value);
+    const promoOnly = document.getElementById('promoOnly').checked;
+
+    // Aqui virá a lógica de filtragem
+    console.log('Aplicar filtros:', { price, sizes, colors, promoOnly });
+  }
+
+  function sortProducts(value) {
+    // Aqui virá a lógica de ordenação
+    console.log('Ordenar por:', value);
+  }
+
+  function changeView(view) {
+    const grid = document.getElementById('productsGrid');
+    const buttons = document.querySelectorAll('.btn-group .btn');
+    
+    buttons.forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+
+    if (view === 'list') {
+      grid.classList.remove('row');
+      grid.classList.add('list-view');
+    } else {
+      grid.classList.remove('list-view');
+      grid.classList.add('row');
+    }
+  }
+</script> 
